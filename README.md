@@ -2,5 +2,4 @@
 
 - Polymer 1.0
 
-An element providing a code editor that renders Web Audio API JS code into an
-AudioBuffer using OfflineAudioContext.
+Renders an `AudioBuffer` out of the Web Audio API JS code using _OfflineAudioContext_. The render setting also can be adjusted if necessary.
