@@ -1,0 +1,105 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>&lt;spiral-coder&gt; | Spiral UI</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../spiral-coder.html">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .element-info {
+        padding: 1.0em;
+        margin-bottom: 1.0em;
+        box-shadow: 2px 0 5px #607D8B;
+        color: #263238;
+        background-color: #ECEFF1;
+        font-family: sans-serif;
+      }
+
+      .element-demo {
+        padding: 1.0em;
+        font-family: sans-serif;
+      }
+
+      .sized {
+        width: 65%;
+        height: 50%;
+        left: 64px;
+      }
+    </style>
+  </head>
+  <body class="fullbleed">
+
+    <div class="vertical layout fit">
+      <div class="element-info">
+
+        <!-- element description -->
+        <h1><code>&lt;spiral-coder&gt;</code></h1>
+        <p>Renders an <code>AudioBuffer</code> out of the Web Audio API JS code
+          using <code>OfflineAudioContext</code>. The render setting also can
+          be adjusted if necessary.</p>
+        <p>When the rendering is finished, <code>onRenderComplete</code>
+          callback will be triggered with the rendered buffer content.</p>
+
+      </div>
+      <div class="element-demo">
+
+        <spiral-coder auto-fit-on-attach id="coder" class="sized"></spiral-coder>
+        <div id="dump"></div>
+
+      </div>
+    
+
+    <script>
+      var coder, dump;
+
+      var controller = {
+        postMessage: function (id, type, data) {
+          dump.textContent = id + '::' + type +
+            ' > the buffer is rendered.';
+        }
+      };
+
+      // Real-time audio context for playback.
+      var context = new AudioContext();
+
+      window.addEventListener('WebComponentsReady', function () {
+
+        coder = document.querySelector('#coder');
+        dump = document.querySelector('#dump');
+
+        coder.setController(controller);
+
+        // TODO: this pattern is better.
+        // coder.on('render-complete', function (buffer) {
+        // });
+
+        // Define on-render-complete action.
+        coder.onRenderComplete = function (buffer) {
+          var source = context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(context.destination);
+          source.start();
+        };
+
+        // Sets the code programmatically.
+        coder.setCode(
+          '// Press render button to hear the sound.\n\n' +
+          'var osc = context.createOscillator();\n' +
+          'var gain = context.createGain();\n' +
+          'gain.gain.value = 0.5;\n' +
+          'osc.connect(gain);\n' +
+          'gain.connect(context.destination);\n' +
+          'osc.start();'
+        );
+      });
+    </script>
+
+  </body>
+</html>
