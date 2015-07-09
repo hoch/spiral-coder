@@ -7,6 +7,7 @@
     <title>&lt;spiral-coder&gt; | Spiral UI</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../spiral-coder.html">
+    <link rel="import" href="app-shell.html">
     <style>
       body {
         margin: 0;
@@ -28,8 +29,8 @@
       }
 
       .sized {
-        width: 640px;
-        height: 480px;
+        width: 60%;
+        height: 50%;
         position: fixed;
         left: 1.0em;
         top: 16em;
@@ -52,7 +53,10 @@
       </div>
       <div class="element-demo">
 
-        <spiral-coder auto-fit-on-attach id="coder" class="sized"></spiral-coder>
+        <app-shell auto-fit-on-attach>
+          <spiral-coder auto-fit-on-attach id="coder" class="sized"></spiral-coder>
+        </app-shell>
+
         <div id="dump"></div>
 
       </div>
