@@ -7,7 +7,6 @@
     <title>&lt;spiral-coder&gt; | Spiral UI</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../spiral-coder.html">
-    <link rel="import" href="app-shell.html">
     <style>
       body {
         margin: 0;
@@ -29,11 +28,13 @@
       }
 
       .sized {
-        width: 60%;
-        height: 50%;
-        position: fixed;
-        left: 1.0em;
-        top: 16em;
+        margin-top: 1em;
+        width: 50%;
+        height: 400px;
+      }
+
+      #eDump {
+        margin-top: 1em;
       }
     </style>
   </head>
@@ -52,42 +53,45 @@
 
       </div>
       <div class="element-demo">
+        <button id="eBtn" onclick="showEditor()">Show Editor</button>
+        <spiral-coder id="eCoder" class="sized"></spiral-coder>
 
-        <app-shell auto-fit-on-attach>
-          <spiral-coder auto-fit-on-attach id="coder" class="sized"></spiral-coder>
-        </app-shell>
-
-        <div id="dump"></div>
+        <div id="eDump"></div>
 
       </div>
     
 
     <script>
-      var coder, dump;
+      var eBtn, eCoder, eDump;
 
       var controller = {
         postMessage: function (id, type, data) {
-          dump.textContent = id + '::' + type +
-            ' > the buffer is rendered.';
+          eDump.textContent = id + '::' + type +
+            ' => the buffer is rendered.';
         }
       };
 
       // Real-time audio context for playback.
       var context = new AudioContext();
 
+      function showEditor() {
+        eCoder.show();
+      }
+
       window.addEventListener('WebComponentsReady', function () {
 
-        coder = document.querySelector('#coder');
-        dump = document.querySelector('#dump');
+        eBtn = document.querySelector('#eBtn');
+        eCoder = document.querySelector('#eCoder');
+        eDump = document.querySelector('#eDump');
 
-        coder.setController(controller);
+        eCoder.setController(controller);
 
         // TODO: this pattern is better.
-        // coder.on('render-complete', function (buffer) {
+        // eCoder.on('render-complete', function (buffer) {
         // });
 
         // Define on-render-complete action.
-        coder.onRenderComplete = function (buffer) {
+        eCoder.onRenderComplete = function (buffer) {
           var source = context.createBufferSource();
           source.buffer = buffer;
           source.connect(context.destination);
@@ -95,7 +99,7 @@
         };
 
         // Sets the code programmatically.
-        coder.setCode(
+        eCoder.setCode(
           '// Press render button to hear the sound.\n\n' +
           'var osc = context.createOscillator();\n' +
           'var gain = context.createGain();\n' +
