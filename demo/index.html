@@ -50,6 +50,8 @@
           be adjusted if necessary.</p>
         <p>When the rendering is finished, <code>onRenderComplete</code>
           callback will be triggered with the rendered buffer content.</p>
+        <p>The render setting also can be adjusted via special tags in the
+          comment.</p>
 
       </div>
       <div class="element-demo">
@@ -100,7 +102,12 @@
 
         // Sets the code programmatically.
         eCoder.setCode(
-          '// Press render button to hear the sound.\n\n' +
+          '// Press render button to hear the sound.\n' +
+          '// The render setting can be adjusted as shown below:\n' +
+          '//\n' +
+          '// @sampleRate 44100\n' +
+          '// @channels 2\n' +
+          '// @duration 1.0\n\n' +
           'var osc = context.createOscillator();\n' +
           'var gain = context.createGain();\n' +
           'gain.gain.value = 0.5;\n' +
