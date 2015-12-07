@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <title>&lt;spiral-coder&gt; | Spiral UI</title>
+    <title>&lt;spiral-coder&gt; | Spiral Audio Elements</title>
     <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
     <link rel="import" href="../spiral-coder.html">
     <style>
@@ -30,7 +30,7 @@
       .sized {
         margin-top: 1em;
         width: 50%;
-        height: 400px;
+        height: 300px;
       }
 
       #eDump {
@@ -45,17 +45,23 @@
 
         <!-- element description -->
         <h1><code>&lt;spiral-coder&gt;</code></h1>
+
         <p>Renders an <code>AudioBuffer</code> out of the Web Audio API JS code
-          using <code>OfflineAudioContext</code>. The render setting also can
-          be adjusted if necessary.</p>
-        <p>When the rendering is finished, <code>onRenderComplete</code>
-          callback will be triggered with the rendered buffer content.</p>
-        <p>The render setting also can be adjusted via special tags in the
-          comment.</p>
+          using <code>OfflineAudioContext</code> When the rendering is finished,
+          <code>onRenderComplete</code> callback will be triggered with the
+          rendered buffer content.</p>
+        <p>The basic audio complete for Web Audio API code is provided. The
+          render setting also can be adjusted via special tags in the comment.
+          Note that the element can be easily sized with CSS. The content will
+          automatically adapt to the specified size.</p>
+        <p>The example in the actual application can be found in
+          <a href="http://hoch.github.io/canopy/" target="_blank">Canopy</a>.
+          </p>
 
       </div>
       <div class="element-demo">
-        <button id="eBtn" onclick="showEditor()">Show Editor</button>
+        <button id="eBtn" onclick="renderAudio()">Render Audio</button>
+        
         <spiral-coder id="eCoder" class="sized"></spiral-coder>
 
         <div id="eDump"></div>
@@ -76,8 +82,8 @@
       // Real-time audio context for playback.
       var context = new AudioContext();
 
-      function showEditor() {
-        eCoder.show();
+      function renderAudio() {
+        eCoder.renderAudioBuffer();
       }
 
       window.addEventListener('WebComponentsReady', function () {
