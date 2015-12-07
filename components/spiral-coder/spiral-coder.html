@@ -1,0 +1,319 @@
+<!--
+Copyright (c) 2015 Hongchan Choi. All rights reserved.
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-fit-behavior/iron-fit-behavior.html">
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+<link rel="import" href="../paper-styles/paper-styles.html">
+
+<!-- CodeMirror -->
+<link rel="stylesheet" href="../CodeMirror/lib/codemirror.css">
+<link rel="stylesheet" href="../CodeMirror/addon/hint/show-hint.css">
+<link rel="stylesheet" href="../CodeMirror/theme/elegant.css">
+<script src="../CodeMirror/lib/codemirror.js"></script>
+<script src="../CodeMirror/mode/javascript/javascript.js"></script>
+<script src="../CodeMirror/addon/hint/show-hint.js"></script>
+<script src="waa-hint.js"></script>
+
+<!-- SpiralCoder::CodeRenderer -->
+<script src="code-renderer.js"></script>
+
+<!--
+An element providing a code editor that renders Web Audio API JS code into an
+AudioBuffer using OfflineAudioContext.
+
+Example:
+
+    <spiral-coder></spiral-coder>
+
+@demo
+-->
+<dom-module id="spiral-coder">
+
+  <style>
+    :host {
+      @apply(--layout);
+      @apply(--layout-horizontal);
+      @apply(--shadow-elevation-2dp);
+      font-family: "Roboto";
+      min-width: 500px;
+      min-height: 250px;
+      width: 100%;
+    }
+
+    #eStatusBar {
+      color: #37474F;
+      background-color: #ECEFF1;
+      height: 23px;
+      line-height: 23px;
+      border-top: 1px solid #ccc;
+      font-size: 10px;
+      text-align: right;
+      padding: 0 7.5px;
+      overflow: hidden;
+    }
+
+    #eStatusBar.on-error {
+      background-color: #F48FB1;
+    }
+  </style>
+
+  <template>
+
+    <div class="flex">
+      <div id="eEditor" class="flex"></div>
+      <div id="eStatusBar"></div>
+    </div>    
+
+  </template>
+
+</dom-module>
+
+<script>
+
+  Polymer({
+
+    is: 'spiral-coder',
+
+    behaviors: [
+      Polymer.IronFitBehavior,
+      Polymer.IronResizableBehavior
+    ],
+
+    properties: {
+
+      _EDITOR_OPTIONS: {
+        type: Object,
+        value: {
+          mode: 'javascript',
+          lineWrapping: true,
+          lineNumbers: true,
+          value: '// Spiral is here!\n\n',
+          theme: 'elegant'
+        }
+      },
+
+      _RENDER_OPTIONS_RANGE: {
+        type: Object,
+        value: {
+          minSampleRate: 3000,
+          maxSampleRate: 192000,
+          minDuration: 0.25,
+          maxDuration: 10.00,
+          minNumChannels: 1,
+          maxNumChannels: 8
+        }
+      },
+
+      _renderOptions: {
+        type: Object,
+        value: {
+          sampleRate: 44100,
+          numChannels: 1,
+          duration: 3
+        }
+      },
+
+      _isDirty: Boolean,
+      _editor: Object,
+      _lastRenderedAudioBuffer: Object,
+      
+      _componentId: {
+        type: String,
+        value: 'spiral-coder'
+      },
+
+      /**
+       * Callback function for the 'render-complete' event.
+       * @type {Function}
+       */
+      onRenderComplete: {
+        type: Function,
+        value: null
+      }
+    },
+
+    listeners: {
+      'iron-resize': '_onResize'
+    },
+
+
+    // Private APIs.
+
+    _markAsDirty: function () {
+      if (this._isDirty)
+        return;
+
+      this._isDirty = true;
+    },
+
+    _markAsClean: function () {
+      if (!this._isDirty)
+        return;
+
+      this._isDirty = false;
+    },
+
+    _showAutoCompletionIfPossible: function (cm) {
+      // On-the-fly auto-completion. (http://jsfiddle.net/u26mK/6/)
+      setTimeout(function () {
+        CodeMirror.showHint(cm, CodeMirror.hint.webaudioapi, { completeSingle: false });
+      }, 250);
+    },
+
+    _onResize: function () {
+      var editorHeight = this.clientHeight - 24;
+      this._editor.setSize('100%', editorHeight);
+      this._editor.refresh();
+    },
+
+    _onCodeChange: function () {
+      this._markAsDirty();
+      this._setStatusBar('post', 'Code changed.');
+    },
+
+    _onRenderSettingChanged: function () {
+      this._markAsDirty();
+      this._setStatusBar('post', 'Render setting changed.');
+    },
+
+    _openRenderSettings: function () {
+      this.$.eSettings.open();
+    },
+
+    _onRenderComplete: function (buffer) {
+      this._lastRenderedAudioBuffer = buffer;
+
+      if (this.onRenderComplete)
+        this.onRenderComplete(this._lastRenderedAudioBuffer);
+
+      this._markAsClean();
+
+      this._setStatusBar('post', 'Successfully rendered.');
+
+      this._notify('render-complete', {
+        buffer: this._lastRenderedAudioBuffer
+      });
+    },    
+
+    _setStatusBar: function (type, message) {
+      switch (type) {
+        case 'post':
+          this.$.eStatusBar.classList.remove('on-error');
+          break;
+        case 'error':
+          this.$.eStatusBar.classList.add('on-error');
+          break;
+      }
+
+      var d = new Date();
+
+      var now = d.getMonth() + '/' + d.getDate() + '/' + d.getFullYear() + ' ' + 
+        d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+
+      eStatusBar.textContent = message + ' (' + now + ')';
+    },
+
+
+    // Spiral-specific common methods.
+
+    _initialize: function () {
+      this._onResize();
+      this._editor.on('change', this._onCodeChange.bind(this));
+
+      // Implement on-the-fly auto-completion.
+      this._editor.on('inputRead', this._showAutoCompletionIfPossible.bind(this));
+
+      this._setStatusBar('post', '<spiral-coder> is ready.');
+      this._isDirty = false;
+    },
+
+    _notify: function (eventType, data) {
+      if (this._controller)
+        this._controller.postMessage(this._componentId, eventType, data);
+    },
+
+
+    // Public APIs.
+
+    /**
+     * Render an AudioBuffer with the current code.
+     */
+    renderAudioBuffer: function () {
+      try {
+        SpiralCoder.renderCodeWithOptions(this._editor.getValue(), {
+          onComplete: this._onRenderComplete.bind(this),
+          sampleRate: this._renderOptions.sampleRate,
+          duration: this._renderOptions.duration,
+          numChannels: this._renderOptions.numChannels
+        });
+      } catch (error) {
+        var message = '[' + error.name + '] ' + error.message + '.';
+        this._setStatusBar('error', message);
+      }
+    },
+
+    /**
+     * Set the controller object. (application message router)
+     * @param {Object} controller An application message router.
+     */
+    setController: function (controller) {
+      this._controller = controller;
+    },
+
+    /**
+     * Set the code content.
+     * @param {String} code Codes as string.
+     */
+    setCode: function (code) {
+      this._editor.setValue(code);
+    },
+
+    /**
+     * Get the current code content.
+     * @return {String} Codes as string.
+     */
+    getCode: function () {
+      return this._editor.getValue();
+    },
+
+    /**
+     * Get the current render options.
+     * @return {Object} The render option as an object.
+     */
+    getRenderSettings: function () {
+      return this._renderOptions;
+    },
+
+    /**
+     * Get the last rendered buffer.
+     * @return {AudioBuffer} The last rendered buffer.
+     */
+    getRenderedBuffer: function () {
+      if (!this._lastRenderedAudioBuffer)
+        return null;
+
+      return this._lastRenderedAudioBuffer;
+    },
+
+    /**
+     * Save the current buffer to a file.
+     */
+    saveCode: function () {
+      // TODO: http://jsfiddle.net/UselessCode/qm5AG/
+      // var code = this._editor.getValue();
+    },
+
+    // Life cycle method.
+
+    ready: function() {
+      this._editor = CodeMirror(this.$.eEditor, this._EDITOR_OPTIONS);
+
+      // Give 5m delay. |this.$.ePanel| height takes some times to be
+      // initialized properly.
+      this.async(this._initialize, 5);
+    }
+
+  });
+
+</script>

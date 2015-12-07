@@ -1,0 +1,37 @@
+{
+  "name": "spiral-coder",
+  "version": "0.0.4",
+  "authors": [
+    "Hongchan Choi <hongchan.choi@gmail.com>"
+  ],
+  "description": "A Polymer element renders Web AudioBuffer featuring on-the-fly code editing.",
+  "keywords": [
+    "web-component",
+    "web-components",
+    "polymer",
+    "audio",
+    "spiral",
+    "code",
+    "editor",
+    "buffer",
+    "render"
+  ],
+  "main": "spiral-coder.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/hoch/spiral-coder/",
+  "ignore": [
+    "/.*",
+    "/test/",
+    "/demo/"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.3",
+    "iron-fit-behavior": "PolymerElements/iron-fit-behavior#^1.0.5",
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^1.0.2",
+    "CodeMirror": "~5.9.0"
+  },
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.5",
+    "web-component-tester": "*"
+  }
+}

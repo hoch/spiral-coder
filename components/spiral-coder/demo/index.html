@@ -1,0 +1,128 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+    <title>&lt;spiral-coder&gt; | Spiral Audio Elements</title>
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../spiral-coder.html">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      .element-info {
+        padding: 1.0em;
+        margin-bottom: 1.0em;
+        box-shadow: 2px 0 5px #607D8B;
+        color: #263238;
+        background-color: #ECEFF1;
+        font-family: sans-serif;
+      }
+
+      .element-demo {
+        padding: 1.0em;
+        font-family: sans-serif;
+      }
+
+      .sized {
+        margin-top: 1em;
+        width: 50%;
+        height: 300px;
+      }
+
+      #eDump {
+        margin-top: 1em;
+      }
+    </style>
+  </head>
+  <body class="fullbleed">
+
+    <div class="vertical layout fit">
+      <div class="element-info">
+
+        <!-- element description -->
+        <h1><code>&lt;spiral-coder&gt;</code></h1>
+
+        <p>Renders an <code>AudioBuffer</code> out of the Web Audio API JS code
+          using <code>OfflineAudioContext</code> When the rendering is finished,
+          <code>onRenderComplete</code> callback will be triggered with the
+          rendered buffer content.</p>
+        <p>The basic audio complete for Web Audio API code is provided. The
+          render setting also can be adjusted via special tags in the comment.
+          Note that the element can be easily sized with CSS. The content will
+          automatically adapt to the specified size.</p>
+        <p>The example in the actual application can be found in
+          <a href="http://hoch.github.io/canopy/" target="_blank">Canopy</a>.
+          </p>
+
+      </div>
+      <div class="element-demo">
+        <button id="eBtn" onclick="renderAudio()">Render Audio</button>
+        
+        <spiral-coder id="eCoder" class="sized"></spiral-coder>
+
+        <div id="eDump"></div>
+
+      </div>
+    
+
+    <script>
+      var eBtn, eCoder, eDump;
+
+      var controller = {
+        postMessage: function (id, type, data) {
+          eDump.textContent = id + '::' + type +
+            ' => the buffer is rendered.';
+        }
+      };
+
+      // Real-time audio context for playback.
+      var context = new AudioContext();
+
+      function renderAudio() {
+        eCoder.renderAudioBuffer();
+      }
+
+      window.addEventListener('WebComponentsReady', function () {
+
+        eBtn = document.querySelector('#eBtn');
+        eCoder = document.querySelector('#eCoder');
+        eDump = document.querySelector('#eDump');
+
+        eCoder.setController(controller);
+
+        // TODO: this pattern is better.
+        // eCoder.on('render-complete', function (buffer) {
+        // });
+
+        // Define on-render-complete action.
+        eCoder.onRenderComplete = function (buffer) {
+          var source = context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(context.destination);
+          source.start();
+        };
+
+        // Sets the code programmatically.
+        eCoder.setCode(
+          '// Press render button to hear the sound.\n' +
+          '// The render setting can be adjusted as shown below:\n' +
+          '//\n' +
+          '// @sampleRate 44100\n' +
+          '// @channels 2\n' +
+          '// @duration 1.0\n\n' +
+          'var osc = context.createOscillator();\n' +
+          'var gain = context.createGain();\n' +
+          'gain.gain.value = 0.5;\n' +
+          'osc.connect(gain);\n' +
+          'gain.connect(context.destination);\n' +
+          'osc.start();'
+        );
+      });
+    </script>
+
+  </body>
+</html>
